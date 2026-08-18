@@ -13,7 +13,7 @@ const GUEST_ID_KEY = "wswattson-guest-id";
 const guestId = localStorage.getItem(GUEST_ID_KEY) || `guest_${crypto.randomUUID()}`;
 localStorage.setItem(GUEST_ID_KEY, guestId);
 const CART_STORAGE_KEY = guestStorageKey(guestId);
-const MANAGEMENT_API_URL = "https://wattsonapi-g4rwwksc.manus.space/api/management";
+const MANAGEMENT_API_URL = "";
 
 function readCart(): CartItem[] {
   try {
@@ -166,7 +166,7 @@ function setupEntranceAnimations(): void {
 
 async function ensureGuestSession(): Promise<void> {
   try {
-    await fetch(`${MANAGEMENT_API_URL}/guest/session`, { credentials: "include", headers: { "X-Guest-Id": guestId } });
+    if (MANAGEMENT_API_URL) await fetch(`${MANAGEMENT_API_URL}/guest/session`, { credentials: "include", headers: { "X-Guest-Id": guestId } });
   } catch {
     // O carrinho continua a funcionar localmente se a API estiver indisponível.
   }
