@@ -8,6 +8,7 @@ interface CartItem {
 
 const WHATSAPP_NUMBER = "244933224116";
 const CART_STORAGE_KEY = "wswattson-cart";
+const MANAGEMENT_API_URL = "https://3000-i7av0m46v8jns5sz9zvhr-852dc69e.us5.manus.computer/api/management";
 
 function readCart(): CartItem[] {
   try {
@@ -28,6 +29,23 @@ function productCards(): HTMLElement[] {
   return productPages.includes(page)
     ? Array.from(document.querySelectorAll<HTMLElement>("article.cartao"))
     : [];
+}
+
+async function hydratePublishedCatalog(): Promise<void> {
+  try {
+    const response = await fetch("catalogo.json", { cache: "no-store" });
+    if (!response.ok) return;
+    const catalog = await response.json() as { products?: Array<{ id: string; name: string; collection: string; description: string; image: string; price?: string; active: boolean }> };
+    const page = window.location.pathname.split("/").pop() || "index.html";
+    const collectionByPage: Record<string, string> = { "feminina.html": "Feminina", "masculina.html": "Masculina", "casais.html": "Casais", "personalizados.html": "Personalizados" };
+    const collection = collectionByPage[page];
+    const products = catalog.products?.filter((product) => product.active && (!collection || product.collection.toLowerCase() === collection.toLowerCase())) || [];
+    const grid = document.querySelector<HTMLElement>(".grelha");
+    if (!grid || !products.length) return;
+    grid.innerHTML = products.map((product) => `<article class="cartao"><img src="${product.image}" alt="${product.name}"><div><h3>${product.name}</h3><p>${product.description}</p></div></article>`).join("");
+  } catch {
+    // As páginas HTML existentes continuam a funcionar se o catálogo não estiver disponível.
+  }
 }
 
 function addProductButtons(): void {
@@ -141,10 +159,20 @@ function setupEntranceAnimations(): void {
   elements.forEach((element) => observer.observe(element));
 }
 
-function initialiseSite(): void {
+async function ensureGuestSession(): Promise<void> {
+  try {
+    await fetch(`${MANAGEMENT_API_URL}/guest/session`, { credentials: "include" });
+  } catch {
+    // O carrinho continua a funcionar localmente se a API estiver indisponível.
+  }
+}
+
+async function initialiseSite(): Promise<void> {
+  void ensureGuestSession();
   setupMobileMenu();
   setupEntranceAnimations();
   createCartPanel();
+  await hydratePublishedCatalog();
   addProductButtons();
   renderCart();
   document.querySelectorAll<HTMLElement>("[data-cart]").forEach((button) => button.addEventListener("click", openCart));
