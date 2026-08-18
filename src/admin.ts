@@ -22,7 +22,7 @@ interface Catalog {
   products: CatalogProduct[];
 }
 
-const API_BASE = (window as Window & { WS_MANAGEMENT_API_URL?: string }).WS_MANAGEMENT_API_URL || "https://3000-i7av0m46v8jns5sz9zvhr-852dc69e.us5.manus.computer/api/management";
+const API_BASE = (window as Window & { WS_MANAGEMENT_API_URL?: string }).WS_MANAGEMENT_API_URL || "https://wattsonapi-g4rwwksc.manus.space/api/management";
 const state: Catalog = { version: 1, updatedAt: new Date().toISOString(), collections: [], products: [] };
 
 async function api(path: string, init?: RequestInit) {

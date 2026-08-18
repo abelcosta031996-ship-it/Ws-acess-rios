@@ -13,7 +13,7 @@ const GUEST_ID_KEY = "wswattson-guest-id";
 const guestId = localStorage.getItem(GUEST_ID_KEY) || `guest_${crypto.randomUUID()}`;
 localStorage.setItem(GUEST_ID_KEY, guestId);
 const CART_STORAGE_KEY = guestStorageKey(guestId);
-const MANAGEMENT_API_URL = "https://3000-i7av0m46v8jns5sz9zvhr-852dc69e.us5.manus.computer/api/management";
+const MANAGEMENT_API_URL = "https://wattsonapi-g4rwwksc.manus.space/api/management";
 
 function readCart(): CartItem[] {
   try {
