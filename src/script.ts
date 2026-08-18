@@ -1,3 +1,5 @@
+import { guestStorageKey } from "./cart-session";
+
 interface CartItem {
   id: string;
   name: string;
@@ -7,7 +9,10 @@ interface CartItem {
 }
 
 const WHATSAPP_NUMBER = "244933224116";
-const CART_STORAGE_KEY = "wswattson-cart";
+const GUEST_ID_KEY = "wswattson-guest-id";
+const guestId = localStorage.getItem(GUEST_ID_KEY) || `guest_${crypto.randomUUID()}`;
+localStorage.setItem(GUEST_ID_KEY, guestId);
+const CART_STORAGE_KEY = guestStorageKey(guestId);
 const MANAGEMENT_API_URL = "https://3000-i7av0m46v8jns5sz9zvhr-852dc69e.us5.manus.computer/api/management";
 
 function readCart(): CartItem[] {
@@ -161,7 +166,7 @@ function setupEntranceAnimations(): void {
 
 async function ensureGuestSession(): Promise<void> {
   try {
-    await fetch(`${MANAGEMENT_API_URL}/guest/session`, { credentials: "include" });
+    await fetch(`${MANAGEMENT_API_URL}/guest/session`, { credentials: "include", headers: { "X-Guest-Id": guestId } });
   } catch {
     // O carrinho continua a funcionar localmente se a API estiver indisponível.
   }
