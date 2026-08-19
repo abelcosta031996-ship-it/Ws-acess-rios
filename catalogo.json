@@ -1,6 +1,6 @@
 {
-  "version": 3,
-  "updatedAt": "2026-08-19T10:55:46.990Z",
+  "version": 4,
+  "updatedAt": "2026-08-19T12:10:02.000Z",
   "collections": [
     {
       "id": "collection_feminina",
@@ -62,14 +62,6 @@
     },
     {
       "id": "feminina_pulseira_feminina_rosa",
-      "name": "Pulseira Feminina rosa",
-      "collection": "Feminina",
-      "description": "Descrever amizade as linhas falam por si",
-      "image": "assets/catalogo/img-5088.jpg",
-      "active": true
-    },
-    {
-      "id": "feminina_pulseira_feminina_rosa_1787136942131",
       "name": "Pulseira Feminina rosa",
       "collection": "Feminina",
       "description": "Descrever amizade as linhas falam por si",
