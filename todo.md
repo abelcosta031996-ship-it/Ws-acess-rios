@@ -23,3 +23,4 @@
 - [ ] Validar que todas as colecções públicas mantêm os produtos originais e apresentam os novos
 - [x] Adicionar uma validação automática que bloqueie publicações que percam produtos originais
 - [x] Impedir a publicação de novos produtos sem imagem e evitar cartões de imagem partida
+- [x] Actualizar a versão do script em todas as colecções públicas para evitar cache antiga

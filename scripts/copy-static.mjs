@@ -1,4 +1,4 @@
-import { cp, mkdir, readdir, rm } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const root = process.cwd();
@@ -25,6 +25,16 @@ try {
   await rm(path.join(dist, "src"), { recursive: true, force: true });
 } catch {
   // O compilador pode emitir directamente para dist conforme o rootDir configurado.
+}
+
+const scriptVersion = "catalog-safe-5";
+const publishedEntries = await readdir(dist, { withFileTypes: true });
+for (const entry of publishedEntries) {
+  if (!entry.isFile() || !entry.name.endsWith(".html")) continue;
+  const pagePath = path.join(dist, entry.name);
+  const page = await readFile(pagePath, "utf8");
+  const updatedPage = page.replace(/script\.js\?v=[^"]+/g, `script.js?v=${scriptVersion}`);
+  if (updatedPage !== page) await writeFile(pagePath, updatedPage, "utf8");
 }
 
 console.log("Ficheiros estáticos copiados para dist/");
