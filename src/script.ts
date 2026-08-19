@@ -10,10 +10,15 @@ interface CartItem {
 
 const WHATSAPP_NUMBER = "244933224116";
 const GUEST_ID_KEY = "wswattson-guest-id";
-const guestId = localStorage.getItem(GUEST_ID_KEY) || `guest_${crypto.randomUUID()}`;
+function createGuestId(): string {
+  const cryptoApi = globalThis.crypto as Crypto & { randomUUID?: () => string };
+  if (typeof cryptoApi?.randomUUID === "function") return `guest_${cryptoApi.randomUUID()}`;
+  return `guest_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}`;
+}
+
+const guestId = localStorage.getItem(GUEST_ID_KEY) || createGuestId();
 localStorage.setItem(GUEST_ID_KEY, guestId);
 const CART_STORAGE_KEY = guestStorageKey(guestId);
-const MANAGEMENT_API_URL = "";
 
 function readCart(): CartItem[] {
   try {
@@ -164,16 +169,12 @@ function setupEntranceAnimations(): void {
   elements.forEach((element) => observer.observe(element));
 }
 
-async function ensureGuestSession(): Promise<void> {
-  try {
-    if (MANAGEMENT_API_URL) await fetch(`${MANAGEMENT_API_URL}/guest/session`, { credentials: "include", headers: { "X-Guest-Id": guestId } });
-  } catch {
-    // O carrinho continua a funcionar localmente se a API estiver indisponível.
-  }
+function ensureGuestSession(): void {
+  // A sessão anónima é local ao dispositivo; nenhuma chamada externa é necessária.
 }
 
 async function initialiseSite(): Promise<void> {
-  void ensureGuestSession();
+  ensureGuestSession();
   setupMobileMenu();
   setupEntranceAnimations();
   createCartPanel();
