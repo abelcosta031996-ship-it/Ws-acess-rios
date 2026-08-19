@@ -1,6 +1,6 @@
 {
-  "version": 6,
-  "updatedAt": "2026-08-19T15:16:59.748Z",
+  "version": 8,
+  "updatedAt": "2026-08-19T15:17:07.591Z",
   "collections": [
     {
       "id": "collection_feminina",
@@ -113,19 +113,11 @@
       "name": "Tripla bracelete",
       "collection": "Masculina",
       "description": "Conjunto de três pulseiras:preta, branca,cinzenta",
-      "image": "",
+      "image": "assets/catalogo/img-5534.jpg",
       "active": true
     },
     {
       "id": "masculina_tripla_bracelete_1787152618835",
-      "name": "Tripla bracelete",
-      "collection": "Masculina",
-      "description": "Conjunto de três pulseiras:preta, branca,cinzenta",
-      "image": "",
-      "active": true
-    },
-    {
-      "id": "masculina_tripla_bracelete_1787152619020",
       "name": "Tripla bracelete",
       "collection": "Masculina",
       "description": "Conjunto de três pulseiras:preta, branca,cinzenta",
