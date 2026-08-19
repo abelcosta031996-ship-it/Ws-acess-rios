@@ -188,7 +188,25 @@ function ensureGuestSession(): void {
   // A sessão anónima é local ao dispositivo; nenhuma chamada externa é necessária.
 }
 
+function applyBrand(): void {
+  const replaceBrand = (value: string) => value.split("WS Wattson Acessórios").join("WS Acessórios").split("WS Wattson").join("WS Acessórios");
+  document.title = replaceBrand(document.title);
+  document.querySelectorAll<HTMLElement>("[alt], [title], meta[name='description']").forEach((element) => {
+    for (const attribute of ["alt", "title", "content"]) {
+      const value = element.getAttribute(attribute);
+      if (value?.includes("WS Wattson")) element.setAttribute(attribute, replaceBrand(value));
+    }
+  });
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const textNodes: Text[] = [];
+  while (walker.nextNode()) textNodes.push(walker.currentNode as Text);
+  textNodes.forEach((node) => {
+    if (node.nodeValue?.includes("WS Wattson")) node.nodeValue = replaceBrand(node.nodeValue);
+  });
+}
+
 async function initialiseSite(): Promise<void> {
+  applyBrand();
   ensureGuestSession();
   setupMobileMenu();
   setupEntranceAnimations();
