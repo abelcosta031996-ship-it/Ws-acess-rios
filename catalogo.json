@@ -1,6 +1,6 @@
 {
-  "version": 15,
-  "updatedAt": "2026-08-19T18:57:00.986Z",
+  "version": 16,
+  "updatedAt": "2026-08-19T19:25:06.394Z",
   "collections": [
     {
       "id": "collection_feminina",
@@ -151,6 +151,15 @@
       "collection": "Masculina",
       "description": "Conjunto de três pulseiras:preta, branca,cinzenta",
       "image": "assets/catalogo/img-5534-mt0gdtke.jpg",
+      "source": "admin",
+      "active": true
+    },
+    {
+      "id": "masculina_pulseira_amor_fati",
+      "name": "Pulseira Amor Fati",
+      "collection": "Masculina",
+      "description": "Pulseira negra com padrão de corações vermelhos",
+      "image": "assets/catalogo/img-5549-mt0hdyvx.jpg",
       "source": "admin",
       "active": true
     }
