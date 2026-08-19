@@ -30,6 +30,7 @@ const CATALOG_URL = "catalogo.json";
 const EDIT_URL = `https://github.com/${REPOSITORY}/edit/${BRANCH}/catalogo.json`;
 const ACTIONS_URL = `https://github.com/${REPOSITORY}/actions/workflows/update-catalog.yml`;
 const API_BASE = `https://api.github.com/repos/${REPOSITORY}/contents`;
+const MANAGED_IMAGE_PREFIX = "assets/catalogo/";
 
 let catalog: Catalog = { version: 1, collections: [], products: [] };
 let githubToken = "";
@@ -91,7 +92,7 @@ function renderCatalog(catalogData: Catalog): void {
     collectionsElement.innerHTML = collections().length ? collections().map((item) => `<article class="published-row"><strong>${escapeHtml(item.name)}</strong>${item.description ? `<span>${escapeHtml(item.description)}</span>` : ""}</article>`).join("") : "<p class=\"admin-empty\">Ainda não existem colecções publicadas.</p>";
   }
   if (productsElement) {
-    productsElement.innerHTML = products().length ? products().map((item) => `<article class="published-product"><img src="${escapeHtml(publicImagePath(item.image))}" alt="${escapeHtml(item.name)}" loading="lazy"><div><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.collection)}</span>${item.price ? `<b>${escapeHtml(item.price)}</b>` : ""}<button type="button" data-edit-product="${escapeHtml(item.id)}">Editar</button></div></article>`).join("") : "<p class=\"admin-empty\">Ainda não existem produtos publicados.</p>";
+    productsElement.innerHTML = products().length ? products().map((item) => `<article class="published-product"><img src="${escapeHtml(publicImagePath(item.image))}" alt="${escapeHtml(item.name)}" loading="lazy"><div><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.collection)}</span>${item.price ? `<b>${escapeHtml(item.price)}</b>` : ""}<button type="button" data-edit-product="${escapeHtml(item.id)}">Editar</button><button type="button" class="remove" data-remove-product="${escapeHtml(item.id)}">Apagar</button></div></article>`).join("") : "<p class=\"admin-empty\">Ainda não existem produtos publicados.</p>";
   }
   renderEditorLists();
 }
@@ -103,7 +104,7 @@ function renderEditorLists(): void {
     collectionList.innerHTML = collections().map((item) => `<li><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.description || "Sem descrição")}</small></span><span><button type="button" data-edit-collection="${escapeHtml(item.id)}">Editar</button><button type="button" data-remove-collection="${escapeHtml(item.id)}">Remover</button></span></li>`).join("");
   }
   if (productList) {
-    productList.innerHTML = products().map((item) => `<li><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.collection)}${item.price ? ` · ${escapeHtml(item.price)}` : ""}</small></span><button type="button" data-edit-product="${escapeHtml(item.id)}">Editar</button><button type="button" data-remove-product="${escapeHtml(item.id)}">Remover</button></li>`).join("");
+    productList.innerHTML = products().map((item) => `<li><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.collection)}${item.price ? ` · ${escapeHtml(item.price)}` : ""}</small></span><button type="button" data-edit-product="${escapeHtml(item.id)}">Editar</button><button type="button" class="remove" data-remove-product="${escapeHtml(item.id)}">Apagar</button></li>`).join("");
   }
   const collectionSelect = document.querySelector<HTMLSelectElement>("[data-product-collection]");
   if (collectionSelect) {
@@ -147,6 +148,20 @@ async function writeGitHubFile(path: string, content: string, message: string): 
   if (!response.ok) {
     const details = await response.text();
     throw new Error(`GitHub recusou a publicação (${response.status}): ${details.slice(0, 180)}`);
+  }
+}
+
+async function deleteGitHubFile(path: string, message: string): Promise<void> {
+  const existing = await readGitHubFile(path);
+  if (!existing.sha) throw new Error("Não foi possível identificar a versão da imagem a apagar.");
+  const response = await githubRequest(path, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, branch: BRANCH, sha: existing.sha }),
+  });
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`GitHub recusou apagar a imagem (${response.status}): ${details.slice(0, 180)}`);
   }
 }
 
@@ -253,6 +268,39 @@ async function publishCatalog(message = "Actualizar catálogo"): Promise<void> {
   await writeGitHubFile(CATALOG_URL, content, message);
 }
 
+async function removeProduct(id: string): Promise<void> {
+  const product = products().find((item) => item.id === id);
+  if (!product) return;
+  const imageIsManaged = product.image.startsWith(MANAGED_IMAGE_PREFIX);
+  const imageIsShared = products().some((item) => item.id !== id && item.image === product.image);
+  const removeImage = imageIsManaged && !imageIsShared;
+  const confirmation = removeImage
+    ? `Apagar “${product.name}” e a sua imagem publicada? Esta acção não pode ser desfeita.`
+    : `Apagar “${product.name}” do catálogo? A imagem será mantida porque é partilhada ou faz parte dos conteúdos originais.`;
+  if (!confirm(confirmation)) return;
+
+  const previousProducts = products().slice();
+  catalog.products = previousProducts.filter((item) => item.id !== id);
+  try {
+    await publishCatalog(`Apagar produto: ${product.name}`);
+    renderCatalog(catalog);
+    if (removeImage) {
+      try {
+        await deleteGitHubFile(product.image, `Apagar imagem: ${product.name}`);
+        setStatus("Produto e imagem apagados com sucesso.");
+      } catch (error) {
+        setStatus(error instanceof Error ? `Produto removido, mas a imagem foi mantida: ${error.message}` : "Produto removido, mas a imagem foi mantida.", true);
+      }
+    } else {
+      setStatus("Produto apagado do catálogo. A imagem foi mantida em segurança.");
+    }
+  } catch (error) {
+    catalog.products = previousProducts;
+    renderCatalog(catalog);
+    throw error;
+  }
+}
+
 function editCollection(id: string): void {
   const collection = collections().find((item) => item.id === id);
   if (!collection) return;
@@ -310,10 +358,7 @@ function wireEditor(): void {
     const editId = target.closest<HTMLElement>("[data-edit-product]")?.dataset.editProduct;
     if (editId) editProduct(editId);
     const removeId = target.closest<HTMLElement>("[data-remove-product]")?.dataset.removeProduct;
-    if (removeId && confirm("Remover este produto do catálogo?")) {
-      catalog.products = products().filter((item) => item.id !== removeId);
-      publishCatalog("Remover produto").then(() => { renderCatalog(catalog); setStatus("Produto removido e catálogo publicado."); }).catch((error) => setStatus(error instanceof Error ? error.message : "Falha ao remover produto.", true));
-    }
+    if (removeId) removeProduct(removeId).catch((error) => setStatus(error instanceof Error ? error.message : "Falha ao apagar produto.", true));
     const editCollectionId = target.closest<HTMLElement>("[data-edit-collection]")?.dataset.editCollection;
     if (editCollectionId) editCollection(editCollectionId);
     const removeCollectionId = target.closest<HTMLElement>("[data-remove-collection]")?.dataset.removeCollection;

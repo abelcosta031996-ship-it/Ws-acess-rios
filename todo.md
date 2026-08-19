@@ -11,3 +11,5 @@
 - [x] Corrigir o transbordo horizontal dos campos da gestão em telemóveis
 - [x] Corrigir o botão Editar dos produtos na gestão
 - [x] Invalidar a versão em cache do JavaScript da gestão após a correcção de edição
+- [ ] Corrigir o envio de imagens da gestão para o repositório e o GitHub Pages
+- [x] Adicionar botão individual para apagar cada produto e a respectiva imagem
