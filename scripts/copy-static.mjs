@@ -33,7 +33,10 @@ for (const entry of publishedEntries) {
   if (!entry.isFile() || !entry.name.endsWith(".html")) continue;
   const pagePath = path.join(dist, entry.name);
   const page = await readFile(pagePath, "utf8");
-  const updatedPage = page.replace(/script\.js\?v=[^"]+/g, `script.js?v=${scriptVersion}`);
+  const updatedPage = page
+    .replace(/script\.js\?v=[^"]+/g, `script.js?v=${scriptVersion}`)
+    .replaceAll("WS Wattson Acessórios", "WS Acessórios")
+    .replaceAll("WS Wattson", "WS Acessórios");
   if (updatedPage !== page) await writeFile(pagePath, updatedPage, "utf8");
 }
 

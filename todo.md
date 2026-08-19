@@ -24,5 +24,7 @@
 - [x] Adicionar uma validação automática que bloqueie publicações que percam produtos originais
 - [x] Impedir a publicação de novos produtos sem imagem e evitar cartões de imagem partida
 - [x] Actualizar a versão do script em todas as colecções públicas para evitar cache antiga
-- [ ] Restaurar as páginas de colecções e impedir que desapareçam após actualizações da gestão
+- [x] Restaurar as páginas de colecções e impedir que desapareçam após actualizações da gestão
 - [x] Renovar a versão do JavaScript público para impedir a execução da cache antiga
+- [x] Alterar o nome visível do site para WS Acessórios
+- [ ] Configurar um endereço público mais curto para o GitHub Pages
