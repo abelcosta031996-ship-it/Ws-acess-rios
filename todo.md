@@ -14,3 +14,5 @@
 - [ ] Corrigir o envio de imagens da gestão para o repositório e o GitHub Pages
 - [x] Adicionar botão individual para apagar cada produto e a respectiva imagem
 - [x] Remover uma entrada duplicada de Pulseira Feminina rosa sem apagar a imagem partilhada
+- [x] Garantir que a alteração de catálogo chega ao site público após publicação
+- [x] Mostrar nas páginas públicas os produtos reais criados, editados ou removidos pela gestão
