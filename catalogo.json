@@ -34,6 +34,7 @@
       "collection": "Feminina",
       "description": "Colar floral com detalhes em vermelho e coloração lápis-lazúli, acompanhado por brincos semelhantes.",
       "image": "assets/femininas1.jpg",
+      "source": "original",
       "active": true
     },
     {
@@ -42,6 +43,7 @@
       "collection": "Feminina",
       "description": "Colar verde com gema central e detalhes com contas estilo pérolas oceânicas.",
       "image": "assets/femininas2.jpg",
+      "source": "original",
       "active": true
     },
     {
@@ -50,6 +52,7 @@
       "collection": "Feminina",
       "description": "Brincos circulares com aspecto exótico e detalhes em verde e preto.",
       "image": "assets/femininas3.jpg",
+      "source": "original",
       "active": true
     },
     {
@@ -58,6 +61,7 @@
       "collection": "Feminina",
       "description": "Acessórios criados para ligar segurança com beleza.",
       "image": "assets/femininas4.jpg",
+      "source": "original",
       "active": true
     },
     {
@@ -66,6 +70,79 @@
       "collection": "Feminina",
       "description": "Descrever amizade as linhas falam por si",
       "image": "assets/catalogo/img-5088.jpg",
+      "source": "admin",
+      "active": true
+    },
+    {
+      "id": "masculina_bracelet",
+      "name": "pulseiras: bracelet",
+      "collection": "Masculina",
+      "description": "pulseiras simples e minimalista.",
+      "image": "assets/masculinas1.jpg",
+      "source": "original",
+      "active": true
+    },
+    {
+      "id": "masculina_sete_nos",
+      "name": "pulseiras: 7 nós perfeitos",
+      "collection": "Masculina",
+      "description": "Cada nó representa 1 dimensão espiritual. Os 7 nós juntos bloqueiam inveja, mau-olhado e energia negativa, enquanto atraem proteção, prosperidade e força.",
+      "image": "assets/masculinas2.jpg",
+      "source": "original",
+      "active": true
+    },
+    {
+      "id": "masculina_britanico",
+      "name": "pulseira: britanico",
+      "collection": "Masculina",
+      "description": "pulseira simples e personalizada.",
+      "image": "assets/masculinas3.jpg",
+      "source": "original",
+      "active": true
+    },
+    {
+      "id": "masculina_conchas",
+      "name": "colar:conchas",
+      "collection": "Masculina",
+      "description": "colar castanho brown com concha central, contas brancas e castanhas e uma forte ligação a praia e a liberdade.",
+      "image": "assets/masculinas4.jpg",
+      "source": "original",
+      "active": true
+    },
+    {
+      "id": "casais_sempre_juntos",
+      "name": "pulseiras: sempre juntos",
+      "collection": "Casais",
+      "description": "pulseiras criadas para aqueles que estão destinados a estar juntos",
+      "image": "assets/casais1.jpg",
+      "source": "original",
+      "active": true
+    },
+    {
+      "id": "casais_azul_azul",
+      "name": "pulseiras: azul & azul",
+      "collection": "Casais",
+      "description": "Pulseiras que simbolizam união e compromisso",
+      "image": "assets/casais2.jpg",
+      "source": "original",
+      "active": true
+    },
+    {
+      "id": "personalizados_identidade",
+      "name": "Pulseiras com identidade",
+      "collection": "Personalizados",
+      "description": "Uma composição personalizada com nomes, letras e símbolos especiais.",
+      "image": "assets/IMG_5123.jpeg",
+      "source": "original",
+      "active": true
+    },
+    {
+      "id": "personalizados_historias",
+      "name": "Detalhes que contam histórias",
+      "collection": "Personalizados",
+      "description": "Fios, letras e pequenos elementos reunidos numa peça única.",
+      "image": "assets/IMG_5122.jpeg",
+      "source": "original",
       "active": true
     },
     {
@@ -74,6 +151,7 @@
       "collection": "Masculina",
       "description": "Conjunto de três pulseiras:preta, branca,cinzenta",
       "image": "",
+      "source": "admin",
       "active": true
     }
   ]

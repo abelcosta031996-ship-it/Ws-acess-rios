@@ -6,6 +6,8 @@ interface CatalogProduct {
   image: string;
   price?: string;
   active?: boolean;
+  source?: "original" | "admin";
+  removedByAdmin?: boolean;
 }
 
 interface CatalogCollection {
@@ -32,11 +34,56 @@ const ACTIONS_URL = `https://github.com/${REPOSITORY}/actions/workflows/update-c
 const API_BASE = `https://api.github.com/repos/${REPOSITORY}/contents`;
 const MANAGED_IMAGE_PREFIX = "assets/catalogo/";
 
+const ORIGINAL_COLLECTIONS: CatalogCollection[] = [
+  { id: "collection_feminina", name: "Feminina", description: "Peças delicadas para todos os dias.", active: true },
+  { id: "collection_masculina", name: "Masculina", description: "Acessórios com presença e identidade.", active: true },
+  { id: "collection_casais", name: "Casais", description: "Peças para partilhar.", active: true },
+  { id: "collection_personalizados", name: "Personalizados", description: "Criações feitas à medida.", active: true },
+];
+
+const ORIGINAL_PRODUCTS: CatalogProduct[] = [
+  { id: "feminina_hidra_azul", name: "Colar & brincos: Hidra azul", collection: "Feminina", description: "Colar floral com detalhes em vermelho e coloração lápis-lazúli, acompanhado por brincos semelhantes.", image: "assets/femininas1.jpg", source: "original", active: true },
+  { id: "feminina_verde_floral", name: "Colar: Verde floral rosa", collection: "Feminina", description: "Colar verde com gema central e detalhes com contas estilo pérolas oceânicas.", image: "assets/femininas2.jpg", source: "original", active: true },
+  { id: "feminina_pantera_rosa", name: "Brincos: Pantera rosa", collection: "Feminina", description: "Brincos circulares com aspecto exótico e detalhes em verde e preto.", image: "assets/femininas3.jpg", source: "original", active: true },
+  { id: "feminina_telemovel", name: "Acessórios para telemóvel e armações", collection: "Feminina", description: "Acessórios criados para ligar segurança com beleza.", image: "assets/femininas4.jpg", source: "original", active: true },
+  { id: "masculina_bracelet", name: "pulseiras: bracelet", collection: "Masculina", description: "pulseiras simples e minimalista.", image: "assets/masculinas1.jpg", source: "original", active: true },
+  { id: "masculina_sete_nos", name: "pulseiras: 7 nós perfeitos", collection: "Masculina", description: "Cada nó representa 1 dimensão espiritual. Os 7 nós juntos bloqueiam inveja, mau-olhado e energia negativa, enquanto atraem proteção, prosperidade e força.", image: "assets/masculinas2.jpg", source: "original", active: true },
+  { id: "masculina_britanico", name: "pulseira: britanico", collection: "Masculina", description: "pulseira simples e personalizada.", image: "assets/masculinas3.jpg", source: "original", active: true },
+  { id: "masculina_conchas", name: "colar:conchas", collection: "Masculina", description: "colar castanho brown com concha central, contas brancas e castanhas e uma forte ligação a praia e a liberdade.", image: "assets/masculinas4.jpg", source: "original", active: true },
+  { id: "casais_sempre_juntos", name: "pulseiras: sempre juntos", collection: "Casais", description: "pulseiras criadas para aqueles que estão destinados a estar juntos", image: "assets/casais1.jpg", source: "original", active: true },
+  { id: "casais_azul_azul", name: "pulseiras: azul & azul", collection: "Casais", description: "Pulseiras que simbolizam união e compromisso", image: "assets/casais2.jpg", source: "original", active: true },
+  { id: "personalizados_identidade", name: "Pulseiras com identidade", collection: "Personalizados", description: "Uma composição personalizada com nomes, letras e símbolos especiais.", image: "assets/IMG_5123.jpeg", source: "original", active: true },
+  { id: "personalizados_historias", name: "Detalhes que contam histórias", collection: "Personalizados", description: "Fios, letras e pequenos elementos reunidos numa peça única.", image: "assets/IMG_5122.jpeg", source: "original", active: true },
+];
+
 let catalog: Catalog = { version: 1, collections: [], products: [] };
 let githubToken = "";
 let editingProductId: string | null = null;
 let editingCollectionId: string | null = null;
 let selectedImage: File | null = null;
+
+function restoreOriginals<T extends { id: string }>(existing: T[], originals: T[]): T[] {
+  const byId = new Map(existing.map((item) => [item.id, item]));
+  originals.forEach((item) => {
+    const current = byId.get(item.id);
+    byId.set(item.id, current ? { ...item, ...current } : { ...item });
+  });
+  return [...byId.values()];
+}
+
+function normaliseCatalog(input: Catalog): Catalog {
+  const restoredProducts = restoreOriginals(input.products || [], ORIGINAL_PRODUCTS).map((item) => ({
+    ...item,
+    source: item.source || (ORIGINAL_PRODUCTS.some((original) => original.id === item.id) ? "original" : "admin"),
+    active: item.active !== false,
+  }));
+  return {
+    version: input.version || 1,
+    updatedAt: input.updatedAt,
+    collections: restoreOriginals(input.collections || [], ORIGINAL_COLLECTIONS).map((item) => ({ ...item, active: item.active !== false })),
+    products: restoredProducts,
+  };
+}
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] || character);
@@ -74,13 +121,12 @@ function products(): CatalogProduct[] {
   return catalog.products || (catalog.products = []);
 }
 
+function activeProducts(): CatalogProduct[] {
+  return products().filter((item) => item.active !== false);
+}
+
 function renderCatalog(catalogData: Catalog): void {
-  catalog = {
-    version: catalogData.version || 1,
-    updatedAt: catalogData.updatedAt,
-    collections: (catalogData.collections || []).filter((item) => item.active !== false),
-    products: (catalogData.products || []).filter((item) => item.active !== false),
-  };
+  catalog = normaliseCatalog(catalogData);
   const collectionsElement = document.querySelector<HTMLElement>("[data-published-collections]");
   const productsElement = document.querySelector<HTMLElement>("[data-published-products]");
   const updatedElement = document.querySelector<HTMLElement>("[data-catalog-updated]");
@@ -89,10 +135,11 @@ function renderCatalog(catalogData: Catalog): void {
     updatedElement.textContent = Number.isNaN(date.getTime()) ? "Catálogo publicado" : `Publicado em ${date.toLocaleDateString("pt-PT")}`;
   }
   if (collectionsElement) {
-    collectionsElement.innerHTML = collections().length ? collections().map((item) => `<article class="published-row"><strong>${escapeHtml(item.name)}</strong>${item.description ? `<span>${escapeHtml(item.description)}</span>` : ""}</article>`).join("") : "<p class=\"admin-empty\">Ainda não existem colecções publicadas.</p>";
+    const visibleCollections = collections().filter((item) => item.active !== false);
+    collectionsElement.innerHTML = visibleCollections.length ? visibleCollections.map((item) => `<article class="published-row"><strong>${escapeHtml(item.name)}</strong>${item.description ? `<span>${escapeHtml(item.description)}</span>` : ""}</article>`).join("") : "<p class=\"admin-empty\">Ainda não existem colecções publicadas.</p>";
   }
   if (productsElement) {
-    productsElement.innerHTML = products().length ? products().map((item) => `<article class="published-product"><img src="${escapeHtml(publicImagePath(item.image))}" alt="${escapeHtml(item.name)}" loading="lazy"><div><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.collection)}</span>${item.price ? `<b>${escapeHtml(item.price)}</b>` : ""}<button type="button" data-edit-product="${escapeHtml(item.id)}">Editar</button><button type="button" class="remove" data-remove-product="${escapeHtml(item.id)}">Apagar</button></div></article>`).join("") : "<p class=\"admin-empty\">Ainda não existem produtos publicados.</p>";
+    productsElement.innerHTML = activeProducts().length ? activeProducts().map((item) => `<article class="published-product"><img src="${escapeHtml(publicImagePath(item.image))}" alt="${escapeHtml(item.name)}" loading="lazy"><div><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.collection)} · ${item.source === "original" ? "Catálogo original" : "Adicionado pela gestão"}</span>${item.price ? `<b>${escapeHtml(item.price)}</b>` : ""}<button type="button" data-edit-product="${escapeHtml(item.id)}">Editar</button><button type="button" class="remove" data-remove-product="${escapeHtml(item.id)}">Apagar</button></div></article>`).join("") : "<p class=\"admin-empty\">Ainda não existem produtos publicados.</p>";
   }
   renderEditorLists();
 }
@@ -104,12 +151,12 @@ function renderEditorLists(): void {
     collectionList.innerHTML = collections().map((item) => `<li><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.description || "Sem descrição")}</small></span><span><button type="button" data-edit-collection="${escapeHtml(item.id)}">Editar</button><button type="button" data-remove-collection="${escapeHtml(item.id)}">Remover</button></span></li>`).join("");
   }
   if (productList) {
-    productList.innerHTML = products().map((item) => `<li><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.collection)}${item.price ? ` · ${escapeHtml(item.price)}` : ""}</small></span><button type="button" data-edit-product="${escapeHtml(item.id)}">Editar</button><button type="button" class="remove" data-remove-product="${escapeHtml(item.id)}">Apagar</button></li>`).join("");
+    productList.innerHTML = activeProducts().map((item) => `<li><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.collection)} · ${item.source === "original" ? "Original" : "Gestão"}${item.price ? ` · ${escapeHtml(item.price)}` : ""}</small></span><button type="button" data-edit-product="${escapeHtml(item.id)}">Editar</button><button type="button" class="remove" data-remove-product="${escapeHtml(item.id)}">Apagar</button></li>`).join("");
   }
   const collectionSelect = document.querySelector<HTMLSelectElement>("[data-product-collection]");
   if (collectionSelect) {
     const current = collectionSelect.value;
-    collectionSelect.innerHTML = collections().map((item) => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`).join("");
+    collectionSelect.innerHTML = collections().filter((item) => item.active !== false).map((item) => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`).join("");
     if (current && collections().some((item) => item.name === current)) collectionSelect.value = current;
   }
 }
@@ -189,7 +236,7 @@ async function prepareImage(file: File): Promise<{ path: string; base64: string 
   const compressed = canvas.toDataURL("image/jpeg", 0.86);
   const base64 = compressed.split(",")[1];
   const baseName = slugify(file.name.replace(/\.[^.]+$/, ""));
-  return { path: `assets/catalogo/${baseName}.jpg`, base64 };
+  return { path: `assets/catalogo/${baseName}-${Date.now().toString(36)}.jpg`, base64 };
 }
 
 function readInput(selector: string): string {
@@ -201,6 +248,8 @@ function clearProductForm(): void {
   selectedImage = null;
   const form = document.querySelector<HTMLFormElement>("[data-product-form]");
   form?.reset();
+  const collectionField = document.querySelector<HTMLSelectElement>("[data-product-collection]");
+  if (collectionField) collectionField.disabled = false;
   const title = document.querySelector<HTMLElement>("[data-product-form-title]");
   if (title) title.textContent = "Adicionar produto";
   const imageName = document.querySelector<HTMLElement>("[data-image-name]");
@@ -214,11 +263,13 @@ function editProduct(id: string): void {
   editorPanel?.removeAttribute("hidden");
   editingProductId = id;
   (document.querySelector<HTMLInputElement>("[data-product-name]")!).value = product.name;
-  (document.querySelector<HTMLSelectElement>("[data-product-collection]")!).value = product.collection;
+  const collectionField = document.querySelector<HTMLSelectElement>("[data-product-collection]")!;
+  collectionField.value = product.collection;
+  collectionField.disabled = product.source === "original";
   (document.querySelector<HTMLTextAreaElement>("[data-product-description]")!).value = product.description;
   (document.querySelector<HTMLInputElement>("[data-product-price]")!).value = product.price || "";
   const title = document.querySelector<HTMLElement>("[data-product-form-title]");
-  if (title) title.textContent = "Editar produto";
+  if (title) title.textContent = product.source === "original" ? "Editar produto original" : "Editar produto";
   setStatus(`A editar: ${product.name}`);
   window.setTimeout(() => document.querySelector<HTMLElement>("[data-product-form]")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
 }
@@ -237,7 +288,7 @@ async function saveProduct(event: SubmitEvent): Promise<void> {
   if (!product) {
     const baseId = `${slugify(collection)}_${slugify(name).replace(/-/g, "_")}`;
     const id = products().some((item) => item.id === baseId) ? `${baseId}_${Date.now()}` : baseId;
-    product = { id, name, collection, description, image: "", active: true };
+    product = { id, name, collection, description, image: "", source: "admin", active: true };
     products().push(product);
   } else {
     product.name = name;
@@ -262,6 +313,7 @@ async function saveProduct(event: SubmitEvent): Promise<void> {
 }
 
 async function publishCatalog(message = "Actualizar catálogo"): Promise<void> {
+  catalog = normaliseCatalog(catalog);
   catalog.version = (catalog.version || 1) + 1;
   catalog.updatedAt = new Date().toISOString();
   const content = encodeBase64Utf8(`${JSON.stringify(catalog, null, 2)}\n`);
@@ -279,11 +331,20 @@ async function removeProduct(id: string): Promise<void> {
     : `Apagar “${product.name}” do catálogo? A imagem será mantida porque é partilhada ou faz parte dos conteúdos originais.`;
   if (!confirm(confirmation)) return;
 
-  const previousProducts = products().slice();
-  catalog.products = previousProducts.filter((item) => item.id !== id);
+  const previousProducts = products().map((item) => ({ ...item }));
+  if (product.source === "original") {
+    product.active = false;
+    product.removedByAdmin = true;
+  } else {
+    catalog.products = previousProducts.filter((item) => item.id !== id);
+  }
   try {
-    await publishCatalog(`Apagar produto: ${product.name}`);
+    await publishCatalog(`Apagar produto individualmente: ${product.name}`);
     renderCatalog(catalog);
+    if (product.source === "original") {
+      setStatus("Produto original removido apenas por esta acção do administrador. A imagem foi preservada.");
+      return;
+    }
     if (removeImage) {
       try {
         await deleteGitHubFile(product.image, `Apagar imagem: ${product.name}`);

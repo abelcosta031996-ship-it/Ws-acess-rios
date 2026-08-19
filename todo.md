@@ -17,3 +17,8 @@
 - [x] Garantir que a alteração de catálogo chega ao site público após publicação
 - [x] Mostrar nas páginas públicas os produtos reais criados, editados ou removidos pela gestão
 - [x] Corrigir a execução do script público de catálogo e carrinho como módulo JavaScript
+- [x] Preservar todas as peças originais no catálogo sem substituição automática
+- [x] Distinguir produtos originais de produtos criados pela gestão
+- [x] Garantir que a gestão apenas acrescenta, edita ou remove o item seleccionado pelo administrador
+- [ ] Validar que todas as colecções públicas mantêm os produtos originais e apresentam os novos
+- [x] Adicionar uma validação automática que bloqueie publicações que percam produtos originais

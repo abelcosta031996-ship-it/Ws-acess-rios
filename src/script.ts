@@ -47,14 +47,26 @@ async function hydratePublishedCatalog(): Promise<void> {
   try {
     const response = await fetch("catalogo.json", { cache: "no-store" });
     if (!response.ok) return;
-    const catalog = await response.json() as { products?: Array<{ id: string; name: string; collection: string; description: string; image: string; price?: string; active: boolean }> };
+    const catalog = await response.json() as { products?: Array<{ id: string; name: string; collection: string; description: string; image: string; price?: string; source?: "original" | "admin"; active?: boolean }> };
     const page = window.location.pathname.split("/").pop() || "index.html";
     const collectionByPage: Record<string, string> = { "feminina.html": "Feminina", "masculina.html": "Masculina", "casais.html": "Casais", "personalizados.html": "Personalizados" };
     const collection = collectionByPage[page];
-    const products = catalog.products?.filter((product) => product.active && (!collection || product.collection.toLowerCase() === collection.toLowerCase())) || [];
+    const allCollectionProducts = catalog.products?.filter((product) => (!collection || product.collection.toLowerCase() === collection.toLowerCase())) || [];
+    const products = allCollectionProducts.filter((product) => product.active !== false);
     const grid = document.querySelector<HTMLElement>(".grelha");
     if (!grid || !products.length) return;
-    grid.innerHTML = products.map((product) => `<article class="cartao"><img src="${product.image}" alt="${product.name}"><div><h3>${product.name}</h3><p>${product.description}</p></div></article>`).join("");
+    const key = (name: string, image: string) => `${name.trim().toLowerCase()}|${image.replace(/^\.\//, "")}`;
+    const fallbackProducts = Array.from(grid.querySelectorAll<HTMLElement>("article.cartao")).map((card) => ({
+      name: card.querySelector("h3")?.textContent?.trim() || "",
+      description: card.querySelector("p")?.textContent?.trim() || "",
+      image: card.querySelector("img")?.getAttribute("src") || "",
+    }));
+    const catalogKeys = new Set(allCollectionProducts.map((product) => key(product.name, product.image)));
+    const extraFallbacks = fallbackProducts.filter((product) => product.name && !catalogKeys.has(key(product.name, product.image)));
+    const originalsInCatalog = allCollectionProducts.filter((product) => product.source === "original");
+    const catalogCoversOriginals = originalsInCatalog.length >= fallbackProducts.length;
+    const shownProducts = catalogCoversOriginals ? products : [...products, ...extraFallbacks];
+    grid.innerHTML = shownProducts.map((product) => `<article class="cartao"><img src="${product.image}" alt="${product.name}"><div><h3>${product.name}</h3><p>${product.description}</p></div></article>`).join("");
   } catch {
     // As páginas HTML existentes continuam a funcionar se o catálogo não estiver disponível.
   }
