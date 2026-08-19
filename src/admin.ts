@@ -195,6 +195,8 @@ function clearProductForm(): void {
 function editProduct(id: string): void {
   const product = products().find((item) => item.id === id);
   if (!product) return;
+  const editorPanel = document.querySelector<HTMLElement>("[data-editor-panel]");
+  editorPanel?.removeAttribute("hidden");
   editingProductId = id;
   (document.querySelector<HTMLInputElement>("[data-product-name]")!).value = product.name;
   (document.querySelector<HTMLSelectElement>("[data-product-collection]")!).value = product.collection;
@@ -202,7 +204,8 @@ function editProduct(id: string): void {
   (document.querySelector<HTMLInputElement>("[data-product-price]")!).value = product.price || "";
   const title = document.querySelector<HTMLElement>("[data-product-form-title]");
   if (title) title.textContent = "Editar produto";
-  document.querySelector<HTMLElement>("[data-editor-panel]")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  setStatus(`A editar: ${product.name}`);
+  window.setTimeout(() => document.querySelector<HTMLElement>("[data-product-form]")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
 }
 
 async function saveProduct(event: SubmitEvent): Promise<void> {
