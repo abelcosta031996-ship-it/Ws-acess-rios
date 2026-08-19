@@ -8,3 +8,4 @@
 - [x] Selecção, compressão e publicação de imagens em `assets/catalogo/`
 - [x] Publicação do catálogo pela GitHub Contents API a partir da gestão
 - [ ] Validar publicação real com um token GitHub fornecido pelo utilizador
+- [x] Corrigir o transbordo horizontal dos campos da gestão em telemóveis
