@@ -1,4 +1,6 @@
-import { guestStorageKey } from "./cart-session";
+function guestStorageKey(guestId: string): string {
+  return `wswattson-cart-${guestId}`;
+}
 
 interface CartItem {
   id: string;

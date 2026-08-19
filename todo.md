@@ -16,3 +16,4 @@
 - [x] Remover uma entrada duplicada de Pulseira Feminina rosa sem apagar a imagem partilhada
 - [x] Garantir que a alteração de catálogo chega ao site público após publicação
 - [x] Mostrar nas páginas públicas os produtos reais criados, editados ou removidos pela gestão
+- [x] Corrigir a execução do script público de catálogo e carrinho como módulo JavaScript
