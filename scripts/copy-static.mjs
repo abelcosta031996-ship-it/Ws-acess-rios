@@ -27,7 +27,7 @@ try {
   // O compilador pode emitir directamente para dist conforme o rootDir configurado.
 }
 
-const scriptVersion = "catalog-safe-5";
+const scriptVersion = "catalog-safe-6";
 const publishedEntries = await readdir(dist, { withFileTypes: true });
 for (const entry of publishedEntries) {
   if (!entry.isFile() || !entry.name.endsWith(".html")) continue;
