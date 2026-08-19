@@ -22,3 +22,4 @@
 - [x] Garantir que a gestão apenas acrescenta, edita ou remove o item seleccionado pelo administrador
 - [ ] Validar que todas as colecções públicas mantêm os produtos originais e apresentam os novos
 - [x] Adicionar uma validação automática que bloqueie publicações que percam produtos originais
+- [x] Impedir a publicação de novos produtos sem imagem e evitar cartões de imagem partida

@@ -66,7 +66,7 @@ async function hydratePublishedCatalog(): Promise<void> {
     const originalsInCatalog = allCollectionProducts.filter((product) => product.source === "original");
     const catalogCoversOriginals = originalsInCatalog.length >= fallbackProducts.length;
     const shownProducts = catalogCoversOriginals ? products : [...products, ...extraFallbacks];
-    grid.innerHTML = shownProducts.map((product) => `<article class="cartao"><img src="${product.image}" alt="${product.name}"><div><h3>${product.name}</h3><p>${product.description}</p></div></article>`).join("");
+    grid.innerHTML = shownProducts.map((product) => `<article class="cartao">${product.image ? `<img src="${product.image}" alt="${product.name}">` : ""}<div><h3>${product.name}</h3><p>${product.description}</p></div></article>`).join("");
   } catch {
     // As páginas HTML existentes continuam a funcionar se o catálogo não estiver disponível.
   }
