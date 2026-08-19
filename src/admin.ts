@@ -256,12 +256,15 @@ async function publishCatalog(message = "Actualizar catálogo"): Promise<void> {
 function editCollection(id: string): void {
   const collection = collections().find((item) => item.id === id);
   if (!collection) return;
+  const editorPanel = document.querySelector<HTMLElement>("[data-editor-panel]");
+  editorPanel?.removeAttribute("hidden");
   editingCollectionId = id;
   (document.querySelector<HTMLInputElement>("[data-collection-name]")!).value = collection.name;
   (document.querySelector<HTMLInputElement>("[data-collection-description]")!).value = collection.description || "";
   const title = document.querySelector<HTMLElement>("[data-collection-form-title]");
   if (title) title.textContent = "Editar colecção";
-  document.querySelector<HTMLElement>("[data-editor-panel]")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  setStatus(`A editar colecção: ${collection.name}`);
+  window.setTimeout(() => document.querySelector<HTMLElement>("[data-collection-form]")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
 }
 
 async function saveCollection(event: SubmitEvent): Promise<void> {
