@@ -51,6 +51,7 @@ async function hydratePublishedCatalog(): Promise<void> {
     const page = window.location.pathname.split("/").pop() || "index.html";
     const collectionByPage: Record<string, string> = { "feminina.html": "Feminina", "masculina.html": "Masculina", "casais.html": "Casais", "personalizados.html": "Personalizados" };
     const collection = collectionByPage[page];
+    if (!collection) return;
     const allCollectionProducts = catalog.products?.filter((product) => (!collection || product.collection.toLowerCase() === collection.toLowerCase())) || [];
     const products = allCollectionProducts.filter((product) => product.active !== false);
     const grid = document.querySelector<HTMLElement>(".grelha");
